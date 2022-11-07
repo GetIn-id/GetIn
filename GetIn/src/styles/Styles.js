@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
   },
   signInSection: {
     width: "90%",
-    height: "50%",
+    height: "25%",
     flexDirection: "column",
     alignSelf: "center",
   },
@@ -88,6 +88,16 @@ export const styles = StyleSheet.create({
   SIlogo: {
     marginTop: "10%",
     alignSelf: "center",
+  },
+  circles: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    alignSelf: "center",
+    width: "90%",
+    height: "25%",
+  },
+  progress: {
+    margin: 10,
   },
   CancelButton: {
     backgroundColor: "#808080",

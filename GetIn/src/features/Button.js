@@ -4,10 +4,10 @@ import {styles} from '../styles/Styles';
 import {useTheme} from '@react-navigation/native';
 
 
-const Button = ({onPress, title, icon, ...props}) => {
+const Button = ({onPress, title, icon, disabled,  ...props}) => {
   const {colors} = useTheme();
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.button, props.style]}>
+    <TouchableOpacity onPress={onPress} disabled={disabled} style={[styles.button, props.style]}>
       {icon}
       <Text
         style={{
@@ -16,7 +16,8 @@ const Button = ({onPress, title, icon, ...props}) => {
           justifyContent: 'center',
           alignSelf: 'center',
           fontSize: 16,
-          color: colors.text,
+          color: "white",
+          fontWeight: "bold"
         }}>
         {title}
       </Text>

@@ -11,7 +11,6 @@ import {
 import Button from '../features/Button';
 import {styles} from '../styles/Styles';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
 import {useTheme} from '@react-navigation/native';
 const logo = require('../assets/logo.png');
@@ -25,10 +24,18 @@ const Settings = ({navigation}) => {
   const {colors} = useTheme();
 
   const readUserFromStorage = async () => {
-    const stringItem = await getItem();
-    const jsonItem = JSON.parse(stringItem);
-    onChangeUsername(jsonItem.username);
-    onChangeEmail(jsonItem.email);
+    try {
+      const stringItem = await getItem();
+      if (stringItem) {
+        const jsonItem = JSON.parse(stringItem);
+        onChangeUsername(jsonItem.username);
+        onChangeEmail(jsonItem.email);
+      } else {
+        console.log('No user info stored');
+      }
+    } catch (error) {
+      console.log("Storage couldn't be accessed!", error);
+    }
   };
 
   const writeUserToStorage = async newValue => {
@@ -70,10 +77,10 @@ const Settings = ({navigation}) => {
               alignSelf: 'center',
               marginHorizontal: 30,
               color: colors.text,
+              marginBottom: 25,
             }}>
             App Settings
           </Text>
-          <View style={styles.divider}></View>
           <View style={styles.settingsCard}>
             <Text style={{color: colors.text}}>Language</Text>
             <Text style={{color: colors.text}}>English</Text>
