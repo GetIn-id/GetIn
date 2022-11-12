@@ -18,6 +18,7 @@ function SignIn({navigation, route}) {
   const [mnemonic, setMnemonic] = useState(null);
   const [seed, setSeed] = useState(null);
   const [decodedUrl, setDecodedUrl] = useState(null);
+  const [encodedUrl, setEncodedUrl] = useState(null);
   const [k1, setk1] = useState(null);
   const [callback, setCallback] = useState(null);
   const [tag, setTag] = useState(null);
@@ -27,7 +28,18 @@ function SignIn({navigation, route}) {
   const [sending, setSending] = useState(false);
   const [invalidQr, setInvalidQr] = useState(false);
   const {colors} = useTheme();
-  const encodedUrl = route.params;
+
+  useEffect(() => {
+    try {
+      if (route.path) {
+        setEncodedUrl(route.path);
+      } else {
+        setEncodedUrl(route.params.lnurl);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
 
   const stringToUint8Array = str => {
     return Uint8Array.from(str, x => x.charCodeAt(0));
@@ -38,7 +50,6 @@ function SignIn({navigation, route}) {
       const credentials = await Keychain.getGenericPassword();
       if (credentials) {
         const stringSeed = credentials.password;
-        //const jsonSeed = JSON.parse(stringSeed);
         const newSeed = Uint8Array.from(
           [...stringSeed].map(ch => ch.charCodeAt()),
         );
@@ -46,7 +57,7 @@ function SignIn({navigation, route}) {
         setMnemonic(newMnemonic);
         setSeed(newSeed);
       } else {
-        console.log('No credentials stored');
+        console.log('No seed stored');
       }
     } catch (error) {
       console.log("Keychain couldn't be accessed!", error);
@@ -55,10 +66,10 @@ function SignIn({navigation, route}) {
 
   useEffect(() => {
     setLoading(true);
-    //readMnemonicFromStorage();
     if (encodedUrl) {
       try {
-        const newUrl = findlnurl(encodedUrl.lnurl);
+        //const newUrl = findlnurl(encodedUrl.lnurl);
+        const newUrl = findlnurl(encodedUrl);
         const lnurl = decodelnurl(newUrl);
         setDecodedUrl(lnurl);
         getParams(lnurl).then(params => {
@@ -70,6 +81,7 @@ function SignIn({navigation, route}) {
         readKeychain();
       } catch (error) {
         setInvalidQr(true);
+        console.log(error);
       }
     }
   }, [encodedUrl]);

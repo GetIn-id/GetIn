@@ -51,7 +51,7 @@ const Settings = ({navigation}) => {
         const newMnemonic = credentials.username;
         setMnemonic(newMnemonic);
       } else {
-        console.log('No credentials stored');
+        console.log('No mnemonic stored');
       }
     } catch (error) {
       console.log("Keychain couldn't be accessed!", error);

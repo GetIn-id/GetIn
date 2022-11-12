@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {SafeAreaView, StatusBar, Text, View, Image} from 'react-native';
 import {styles} from '../styles/Styles';
-import BdkRn from 'bdk-rn';
 import Button from '../features/Button';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {mnemonicToSeed} from '@scure/bip39';
@@ -10,6 +9,8 @@ import {useTheme} from '@react-navigation/native';
 import {useColorScheme} from 'react-native';
 import * as Keychain from 'react-native-keychain';
 import * as Progress from 'react-native-progress';
+import {generateMnemonic} from '@scure/bip39';
+import {wordlist} from '@scure/bip39/wordlists/english';
 
 const logo = require('../assets/Logo2.png');
 
@@ -39,7 +40,7 @@ const Home = ({navigation, route}) => {
     try {
       await Keychain.setGenericPassword(mnemonic, seed);
       setMnemonic(mnemonic);
-      readMnemonicFromStorage();
+      await readMnemonicFromStorage();
     } catch (error) {
       console.log('Keychain error', error);
     }
@@ -47,20 +48,17 @@ const Home = ({navigation, route}) => {
 
   const createMnemonic = async () => {
     try {
-      const {data} = await BdkRn.generateMnemonic({
-        length: 12,
-        network: 'mainnet',
-      });
-      if (data) {
-        const seed = await mnemonicToSeed(data);
+      const mn = generateMnemonic(wordlist, 128);
+      if (mn) {
+        const seed = await mnemonicToSeed(mn);
         setSeed(seed);
         const seedString = String.fromCharCode(...seed);
-        writeMnemonicToStorage(data, seedString);
+        await writeMnemonicToStorage(mn, seedString);
       } else {
         console.log('No mnemonic');
       }
     } catch (error) {
-      console.log('BDK error', error);
+      console.log('Generating mnemonic or seed error', error);
     }
   };
 
@@ -84,7 +82,7 @@ const Home = ({navigation, route}) => {
         {loading ? (
           <>
             <View style={styles.textSection}>
-            <Text
+              <Text
                 style={{
                   fontSize: 24,
                   fontWeight: 'bold',
@@ -106,10 +104,10 @@ const Home = ({navigation, route}) => {
               </Text>
             </View>
             <View style={styles.circles}>
-            <Progress.CircleSnail
-              style={styles.progress}
-              color={'#00e575ff'}
-            />
+              <Progress.CircleSnail
+                style={styles.progress}
+                color={'#00e575ff'}
+              />
             </View>
           </>
         ) : (
@@ -146,8 +144,8 @@ const Home = ({navigation, route}) => {
                     paddingTop: 20,
                   }}>
                   Log in on a webpage by clicking the button below and scan the
-                  QR code.
-                </Text>
+                  QR code. If the QR is on this device, just tap it!  
+                </Text> 
               )}
             </View>
             <View style={styles.buttonSection}>

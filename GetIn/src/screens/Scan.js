@@ -4,7 +4,8 @@ import QRCodeScanner from "react-native-qrcode-scanner";
 function Scan({ navigation }) {
 
   onSuccess = (e) => {
-    navigation.navigate("Sign In", {
+    console.log(e.data);
+    navigation.navigate("SignIn", {
       lnurl: e.data,
    });
   };
