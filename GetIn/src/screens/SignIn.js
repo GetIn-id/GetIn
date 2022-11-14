@@ -134,13 +134,13 @@ function SignIn({navigation, route}) {
       .then(response => response.json())
       .then(json => {
         setSending(false);
-        navigation.navigate('Home', {
+        navigation.navigate('Success', {
           message: `Succesfully signed in to ${domain}. Go to the web page.`,
         });
       })
       .catch(error => {
         console.error(error);
-        navigation.navigate('Home', {
+        navigation.navigate('HomeTabs', {
           message: `Sign in to ${domain} failed. Try again.`,
         });
       });

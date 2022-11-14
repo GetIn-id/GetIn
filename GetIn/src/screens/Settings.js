@@ -7,17 +7,20 @@ import {
   StatusBar,
   Modal,
   Pressable,
+  Linking,
+  Image,
 } from 'react-native';
 import Button from '../features/Button';
 import {styles} from '../styles/Styles';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
 import {useTheme} from '@react-navigation/native';
-const logo = require('../assets/logo.png');
+const logo = require('../assets/checkbox2.png');
 
 const Settings = ({navigation}) => {
   const {getItem, setItem} = useAsyncStorage('user');
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState(false);
   const [username, onChangeUsername] = useState('');
   const [email, onChangeEmail] = useState('');
   const [mnemonic, setMnemonic] = useState('');
@@ -39,9 +42,12 @@ const Settings = ({navigation}) => {
   };
 
   const writeUserToStorage = async newValue => {
+    setModalVisible2(true);
     const jsonValue = JSON.stringify(newValue);
     await setItem(jsonValue);
-    navigation.navigate('Home');
+    setTimeout(() => {
+      setModalVisible2(false);
+    }, 1250);
   };
 
   const getMnemonic = async () => {
@@ -88,17 +94,20 @@ const Settings = ({navigation}) => {
           <View style={styles.divider}></View>
           <View style={styles.settingsCard}>
             <Text style={{color: colors.text}}>About us</Text>
-            <Text style={{color: colors.text}}>webpage</Text>
+            <Text
+              style={{color: colors.text}}
+              onPress={() => {
+                Linking.openURL('https://getin.id');
+              }}>
+              Webpage
+            </Text>
           </View>
           <View style={styles.divider}></View>
           <View style={styles.settingsCard}>
             <Text style={{color: colors.text}}>Back up phrase</Text>
-            <Pressable
-              // style={[styles.button, styles.buttonOpen]}
-              onPress={() => setModalVisible(true)}>
+            <Pressable onPress={() => setModalVisible(true)}>
               <Text style={{color: colors.text}}>Show</Text>
             </Pressable>
-            {/* <Text>show</Text> */}
           </View>
           <View style={styles.divider}></View>
           <View style={styles.settingsCard}>
@@ -232,6 +241,20 @@ const Settings = ({navigation}) => {
                 Close
               </Text>
             </Pressable>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible2}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setModalVisible(!modalVisible2);
+        }}>
+        <View style={styles.centeredView}>
+          <View>
+            <Image style={{width: 100, height: 100}}source={logo} />
           </View>
         </View>
       </Modal>
