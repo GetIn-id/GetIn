@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, SafeAreaView, Image} from 'react-native';
+import {View, Text, SafeAreaView, Image, Switch, Linking} from 'react-native';
 import Button from '../features/Button';
 import {styles} from '../styles/Styles';
 import {getParams, decodelnurl, findlnurl} from 'js-lnurl';
 import {useTheme} from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 import * as Progress from 'react-native-progress';
+import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 // crypto imports
 import {Buffer} from 'buffer';
 import {HDKey} from '@scure/bip32';
@@ -27,14 +28,22 @@ function SignIn({navigation, route}) {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [invalidQr, setInvalidQr] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(false);
+  const [sameDevice, setSameDevice] = useState(false);
+  const {getItem, setItem} = useAsyncStorage('user');
+  const [username, setUsername] = useState('');
   const {colors} = useTheme();
+
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
   useEffect(() => {
     try {
       if (route.path) {
         setEncodedUrl(route.path);
+        setSameDevice(true);
       } else {
         setEncodedUrl(route.params.lnurl);
+        setSameDevice(false);
       }
     } catch (error) {
       console.log(error);
@@ -43,6 +52,20 @@ function SignIn({navigation, route}) {
 
   const stringToUint8Array = str => {
     return Uint8Array.from(str, x => x.charCodeAt(0));
+  };
+
+  const readUserFromStorage = async () => {
+    try {
+      const stringItem = await getItem();
+      if (stringItem) {
+        const jsonItem = JSON.parse(stringItem);
+        setUsername(jsonItem.username);
+      } else {
+        console.log('No user info stored');
+      }
+    } catch (error) {
+      console.log("Storage couldn't be accessed!", error);
+    }
   };
 
   const readKeychain = async () => {
@@ -66,6 +89,7 @@ function SignIn({navigation, route}) {
 
   useEffect(() => {
     setLoading(true);
+    readUserFromStorage();
     if (encodedUrl) {
       try {
         //const newUrl = findlnurl(encodedUrl.lnurl);
@@ -121,14 +145,20 @@ function SignIn({navigation, route}) {
       const linkingPublicKeyBuffer = Buffer.from(linkingPublicKey);
       const linkingPublicKeyHex = linkingPublicKeyBuffer.toString('hex');
 
-      const auth = `${callback}&sig=${signedK1hex}&key=${linkingPublicKeyHex}`;
-
-      setAuth(auth);
+      if (username !== '' && isEnabled) {
+        const auth = `${callback}&sig=${signedK1hex}&key=${linkingPublicKeyHex}&username=${username}`;
+        setAuth(auth);
+      } else {
+        const auth = `${callback}&sig=${signedK1hex}&key=${linkingPublicKeyHex}`;
+        setAuth(auth);
+      }
       setLoading(false);
     }
-  }, [seed]);
+  }, [seed, isEnabled]);
 
   const handleSignIn = () => {
+    const domainSplit = domain.split('.');
+    const navUrl = 'https://' + domainSplit[1] + '.' + domainSplit[2];
     setSending(true);
     fetch(auth)
       .then(response => response.json())
@@ -136,6 +166,8 @@ function SignIn({navigation, route}) {
         setSending(false);
         navigation.navigate('Success', {
           message: `Succesfully signed in to ${domain}. Go to the web page.`,
+          navUrl: navUrl,
+          sameDevice: sameDevice,
         });
       })
       .catch(error => {
@@ -216,6 +248,27 @@ function SignIn({navigation, route}) {
               }}>
               Do you want to sign in to {domain}?
             </Text>
+            <Text
+              style={{
+                color: colors.text,
+                fontSize: 20,
+                alignSelf: 'center',
+                marginHorizontal: 30,
+                paddingTop: 40,
+                paddingBottom: 15,
+              }}>
+              Share user info
+            </Text>
+            <View style={styles.settingsCard}>
+              <Text style={{color: colors.text}}>Username</Text>
+              <Switch
+                trackColor={{false: '#767577', true: colors.primary}}
+                // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={toggleSwitch}
+                value={isEnabled}
+              />
+            </View>
           </View>
           {loading || sending ? (
             <View style={styles.circles}>

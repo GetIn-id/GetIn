@@ -1,18 +1,30 @@
 import React, {useEffect} from 'react';
-import {SafeAreaView, StatusBar, Text, View, Image} from 'react-native';
+import {
+  SafeAreaView,
+  StatusBar,
+  Text,
+  View,
+  Image,
+  Linking,
+} from 'react-native';
 import {styles} from '../styles/Styles';
 import {useTheme} from '@react-navigation/native';
-
 
 const logo = require('../assets/checkbox2.png');
 
 const Success = ({navigation, route}) => {
   const {colors} = useTheme();
-  const message = route.params;
+  const message = route.params.message;
+  const navUrl = route.params.navUrl;
+  const sameDevice = route.params.sameDevice;
 
   useEffect(() => {
     setTimeout(() => {
+      if (sameDevice) {
+        Linking.openURL(navUrl);
+      } else {
         navigation.navigate('HomeTabs');
+      }
     }, 2500);
   }, []);
 
@@ -44,7 +56,7 @@ const Success = ({navigation, route}) => {
               marginHorizontal: 30,
               paddingTop: 20,
             }}>
-            {message.message}
+            {message}
           </Text>
         </View>
         <View style={styles.buttonSection}></View>

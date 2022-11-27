@@ -35,7 +35,7 @@ const App = () => {
   };
 
   const linking = {
-    prefixes: ['lightning:'],
+    prefixes: ['lightning:', 'LIGHTNING:'],
     config,
   };
   
