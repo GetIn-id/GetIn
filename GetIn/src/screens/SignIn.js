@@ -37,6 +37,7 @@ function SignIn({navigation, route}) {
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
   useEffect(() => {
+    console.log(route);
     try {
       if (route.path) {
         setEncodedUrl(route.path);
@@ -164,7 +165,8 @@ function SignIn({navigation, route}) {
       .then(response => response.json())
       .then(json => {
         setSending(false);
-        navigation.navigate('Success', {
+        navigation.navigate('Success',
+        {
           message: `Succesfully signed in to ${domain}. Go to the web page.`,
           navUrl: navUrl,
           sameDevice: sameDevice,
@@ -216,7 +218,7 @@ function SignIn({navigation, route}) {
             <Button
               title="Cancel"
               style={styles.CancelButton}
-              onPress={() => navigation.navigate('Home')}
+              onPress={() => navigation.navigate('HomeTabs')}
             />
           </View>
         </View>
@@ -286,7 +288,7 @@ function SignIn({navigation, route}) {
             <Button
               title="Cancel"
               style={styles.CancelButton}
-              onPress={() => navigation.navigate('Home')}
+              onPress={() => navigation.navigate('HomeTabs', { replace: true })}
             />
             {loading ? (
               <Button

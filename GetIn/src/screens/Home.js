@@ -5,7 +5,7 @@ import Button from '../features/Button';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {mnemonicToSeed} from '@scure/bip39';
 import * as encoding from 'text-encoding';
-import {useTheme} from '@react-navigation/native';
+import {useTheme, StackActions} from '@react-navigation/native';
 import {useColorScheme} from 'react-native';
 import * as Keychain from 'react-native-keychain';
 import * as Progress from 'react-native-progress';
@@ -21,6 +21,7 @@ const Home = ({navigation, route}) => {
   const message = route.params;
   const {colors} = useTheme();
   const scheme = useColorScheme();
+
 
   const readMnemonicFromStorage = async () => {
     try {

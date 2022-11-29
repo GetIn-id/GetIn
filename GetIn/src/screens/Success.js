@@ -8,7 +8,7 @@ import {
   Linking,
 } from 'react-native';
 import {styles} from '../styles/Styles';
-import {useTheme} from '@react-navigation/native';
+import {useTheme, StackActions} from '@react-navigation/native';
 
 const logo = require('../assets/checkbox2.png');
 
@@ -22,8 +22,9 @@ const Success = ({navigation, route}) => {
     setTimeout(() => {
       if (sameDevice) {
         Linking.openURL(navUrl);
+        navigation.dispatch(StackActions.popToTop());
       } else {
-        navigation.navigate('HomeTabs');
+        navigation.popToTop('HomeTabs');
       }
     }, 2500);
   }, []);
