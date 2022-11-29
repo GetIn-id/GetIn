@@ -37,7 +37,6 @@ function SignIn({navigation, route}) {
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
   useEffect(() => {
-    console.log(route);
     try {
       if (route.path) {
         setEncodedUrl(route.path);
@@ -165,8 +164,7 @@ function SignIn({navigation, route}) {
       .then(response => response.json())
       .then(json => {
         setSending(false);
-        navigation.navigate('Success',
-        {
+        navigation.navigate('Success', {
           message: `Succesfully signed in to ${domain}. Go to the web page.`,
           navUrl: navUrl,
           sameDevice: sameDevice,
@@ -250,27 +248,56 @@ function SignIn({navigation, route}) {
               }}>
               Do you want to sign in to {domain}?
             </Text>
-            <Text
-              style={{
-                color: colors.text,
-                fontSize: 20,
-                alignSelf: 'center',
-                marginHorizontal: 30,
-                paddingTop: 40,
-                paddingBottom: 15,
-              }}>
-              Share user info
-            </Text>
-            <View style={styles.settingsCard}>
-              <Text style={{color: colors.text}}>Username</Text>
-              <Switch
-                trackColor={{false: '#767577', true: colors.primary}}
-                // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={toggleSwitch}
-                value={isEnabled}
-              />
-            </View>
+            {domain == 'auth.getin.id' ? (
+              <>
+                <Text
+                  style={{
+                    color: colors.text,
+                    fontSize: 20,
+                    alignSelf: 'center',
+                    marginHorizontal: 30,
+                    paddingTop: 40,
+                    paddingBottom: 15,
+                  }}>
+                  Share user data
+                </Text>
+                <View style={styles.settingsCard}>
+                  <Text style={{color: colors.text}}>Username</Text>
+                  <Switch
+                    trackColor={{false: '#767577', true: colors.primary}}
+                    // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={toggleSwitch}
+                    value={isEnabled}
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                <Text
+                  style={{
+                    color: colors.text,
+                    fontSize: 14,
+                    alignSelf: 'center',
+                    marginHorizontal: 30,
+                    paddingTop: 40,
+                    paddingBottom: 15,
+                  }}>
+                  Share user data is not enabled on this site
+                </Text>
+                <View style={styles.settingsCard}>
+                  <Text style={{color: colors.text}}>Username</Text>
+                  <Switch
+                    trackColor={{false: '#767577', true: colors.primary}}
+                    // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={toggleSwitch}
+                    value={isEnabled}
+                    disabled={true}
+                  />
+                </View>
+              </>
+            )}
           </View>
           {loading || sending ? (
             <View style={styles.circles}>
@@ -288,7 +315,7 @@ function SignIn({navigation, route}) {
             <Button
               title="Cancel"
               style={styles.CancelButton}
-              onPress={() => navigation.navigate('HomeTabs', { replace: true })}
+              onPress={() => navigation.navigate('HomeTabs', {replace: true})}
             />
             {loading ? (
               <Button

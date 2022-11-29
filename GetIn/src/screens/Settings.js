@@ -15,15 +15,19 @@ import {styles} from '../styles/Styles';
 import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
 import {useTheme} from '@react-navigation/native';
+import {mnemonicToSeed} from '@scure/bip39';
 const logo = require('../assets/checkbox2.png');
 
 const Settings = ({navigation}) => {
   const {getItem, setItem} = useAsyncStorage('user');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
+  const [modalVisible3, setModalVisible3] = useState(false);
   const [username, onChangeUsername] = useState('');
   const [email, onChangeEmail] = useState('');
+  const [backUp, onChangeBackUp] = useState('');
   const [mnemonic, setMnemonic] = useState('');
+  const [seed, setSeed] = useState('');
   const {colors} = useTheme();
 
   const readUserFromStorage = async () => {
@@ -64,10 +68,40 @@ const Settings = ({navigation}) => {
     }
   };
 
+  const writeMnemonicToStorage = async (mnemonic, seed) => {
+    await Keychain.resetGenericPassword();
+    try {
+      console.log(mnemonic);
+      const seed = await mnemonicToSeed(mnemonic);
+      const seedString = String.fromCharCode(...seed);
+      await Keychain.setGenericPassword(mnemonic, seedString);
+      await getMnemonic();
+    } catch (error) {
+      console.log('Keychain error', error);
+    }
+  };
+
   useEffect(() => {
     readUserFromStorage();
     getMnemonic();
   }, []);
+
+  const UselessTextInput = props => {
+    return (
+      <TextInput
+        {...props} // Inherit any props passed to it; e.g., multiline, numberOfLines below
+        editable
+        maxLength={200}
+        autoCapitalize="none"
+        autoFocus="true"
+      />
+    );
+  };
+
+  const handleBackUp = () => {
+    setModalVisible3(!modalVisible3);
+    writeMnemonicToStorage(backUp, seed);
+  };
 
   return (
     <SafeAreaView>
@@ -107,6 +141,13 @@ const Settings = ({navigation}) => {
             <Text style={{color: colors.text}}>Back up phrase</Text>
             <Pressable onPress={() => setModalVisible(true)}>
               <Text style={{color: colors.text}}>Show</Text>
+            </Pressable>
+          </View>
+          <View style={styles.divider}></View>
+          <View style={styles.settingsCard}>
+            <Text style={{color: colors.text}}>Import back up</Text>
+            <Pressable onPress={() => setModalVisible3(true)}>
+              <Text style={{color: colors.text}}>Import</Text>
             </Pressable>
           </View>
           <View style={styles.divider}></View>
@@ -254,7 +295,91 @@ const Settings = ({navigation}) => {
         }}>
         <View style={styles.centeredView}>
           <View>
-            <Image style={{width: 100, height: 100}}source={logo} />
+            <Image style={{width: 100, height: 100}} source={logo} />
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible3}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setModalVisible(!modalVisible3);
+        }}>
+        <View style={styles.centeredView}>
+          <View
+            style={{
+              margin: '5%',
+              backgroundColor: colors.card,
+              borderRadius: 0,
+              padding: 35,
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 5,
+            }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                alignSelf: 'center',
+                marginHorizontal: 30,
+                color: colors.text,
+              }}>
+              Enter your back up phrase:
+            </Text>
+            <View
+              style={{
+                borderWidth: 1,
+                minWidth: "100%",
+                minHeight: "20%",
+                marginTop: 20,
+                borderColor: colors.border,
+                color: colors.text,
+              }}>
+              <UselessTextInput
+                multiline
+                numberOfLines={4}
+                onChangeText={text => onChangeBackUp(text)}
+                placeholder="word1 word2 word3 ..."
+                value={backUp}
+                style={{padding: 10}}
+              />
+            </View>
+            <Pressable
+              //style={[styles.button, styles.buttonClose]}
+              onPress={handleBackUp}>
+              <Text
+                style={{
+                  color: colors.text,
+                  fontSize: 16,
+                  alignSelf: 'center',
+                  marginHorizontal: 30,
+                  paddingTop: 20,
+                }}>
+                Save
+              </Text>
+            </Pressable>
+            <Pressable
+              //style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible3(!modalVisible3)}>
+              <Text
+                style={{
+                  color: colors.text,
+                  fontSize: 16,
+                  alignSelf: 'center',
+                  marginHorizontal: 30,
+                  paddingTop: 20,
+                }}>
+                Close
+              </Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
