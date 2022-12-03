@@ -22,7 +22,6 @@ const Home = ({navigation, route}) => {
   const {colors} = useTheme();
   const scheme = useColorScheme();
 
-
   const readMnemonicFromStorage = async () => {
     try {
       const credentials = await Keychain.getGenericPassword();

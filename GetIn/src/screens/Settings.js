@@ -8,51 +8,32 @@ import {
   Modal,
   Pressable,
   Linking,
-  Image,
 } from 'react-native';
 import Button from '../features/Button';
 import {styles} from '../styles/Styles';
-import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
 import {useTheme} from '@react-navigation/native';
 import {mnemonicToSeed} from '@scure/bip39';
 const logo = require('../assets/checkbox2.png');
 
 const Settings = ({navigation}) => {
-  const {getItem, setItem} = useAsyncStorage('user');
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalVisible2, setModalVisible2] = useState(false);
   const [modalVisible3, setModalVisible3] = useState(false);
-  const [username, onChangeUsername] = useState('');
-  const [email, onChangeEmail] = useState('');
-  const [backUp, onChangeBackUp] = useState('');
+  const [backUp1, onChangeBackUp1] = useState('');
+  const [backUp2, onChangeBackUp2] = useState('');
+  const [backUp3, onChangeBackUp3] = useState('');
+  const [backUp4, onChangeBackUp4] = useState('');
+  const [backUp5, onChangeBackUp5] = useState('');
+  const [backUp6, onChangeBackUp6] = useState('');
+  const [backUp7, onChangeBackUp7] = useState('');
+  const [backUp8, onChangeBackUp8] = useState('');
+  const [backUp9, onChangeBackUp9] = useState('');
+  const [backUp10, onChangeBackUp10] = useState('');
+  const [backUp11, onChangeBackUp11] = useState('');
+  const [backUp12, onChangeBackUp12] = useState('');
   const [mnemonic, setMnemonic] = useState('');
   const [seed, setSeed] = useState('');
   const {colors} = useTheme();
-
-  const readUserFromStorage = async () => {
-    try {
-      const stringItem = await getItem();
-      if (stringItem) {
-        const jsonItem = JSON.parse(stringItem);
-        onChangeUsername(jsonItem.username);
-        onChangeEmail(jsonItem.email);
-      } else {
-        console.log('No user info stored');
-      }
-    } catch (error) {
-      console.log("Storage couldn't be accessed!", error);
-    }
-  };
-
-  const writeUserToStorage = async newValue => {
-    setModalVisible2(true);
-    const jsonValue = JSON.stringify(newValue);
-    await setItem(jsonValue);
-    setTimeout(() => {
-      setModalVisible2(false);
-    }, 1250);
-  };
 
   const getMnemonic = async () => {
     try {
@@ -82,23 +63,34 @@ const Settings = ({navigation}) => {
   };
 
   useEffect(() => {
-    readUserFromStorage();
     getMnemonic();
   }, []);
 
-  const UselessTextInput = props => {
-    return (
-      <TextInput
-        {...props} // Inherit any props passed to it; e.g., multiline, numberOfLines below
-        editable
-        maxLength={200}
-        autoCapitalize="none"
-        autoFocus="true"
-      />
-    );
-  };
-
   const handleBackUp = () => {
+    const backUp =
+      backUp1 +
+      ' ' +
+      backUp2 +
+      ' ' +
+      backUp3 +
+      ' ' +
+      backUp4 +
+      ' ' +
+      backUp5 +
+      ' ' +
+      backUp6 +
+      ' ' +
+      backUp7 +
+      ' ' +
+      backUp8 +
+      ' ' +
+      backUp9 +
+      ' ' +
+      backUp10 +
+      ' ' +
+      backUp11 +
+      ' ' +
+      backUp12;
     setModalVisible3(!modalVisible3);
     writeMnemonicToStorage(backUp, seed);
   };
@@ -110,24 +102,13 @@ const Settings = ({navigation}) => {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.container}>
         <View>
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: 'bold',
-              alignSelf: 'center',
-              marginHorizontal: 30,
-              color: colors.text,
-              marginBottom: 25,
-            }}>
-            App Settings
-          </Text>
-          <View style={styles.settingsCard}>
-            <Text style={{color: colors.text}}>Language</Text>
+          <View style={[styles.settingsCard, {marginTop: 15}]}>
+            <Text style={{color: colors.text, fontWeight: 'bold'}}>Language</Text>
             <Text style={{color: colors.text}}>English</Text>
           </View>
           <View style={styles.divider}></View>
           <View style={styles.settingsCard}>
-            <Text style={{color: colors.text}}>About us</Text>
+            <Text style={{color: colors.text, fontWeight: 'bold'}}>About us</Text>
             <Text
               style={{color: colors.text}}
               onPress={() => {
@@ -138,89 +119,25 @@ const Settings = ({navigation}) => {
           </View>
           <View style={styles.divider}></View>
           <View style={styles.settingsCard}>
-            <Text style={{color: colors.text}}>Back up phrase</Text>
+            <Text style={{color: colors.text, fontWeight: 'bold'}}>Back up phrase</Text>
             <Pressable onPress={() => setModalVisible(true)}>
               <Text style={{color: colors.text}}>Show</Text>
             </Pressable>
           </View>
           <View style={styles.divider}></View>
           <View style={styles.settingsCard}>
-            <Text style={{color: colors.text}}>Import back up</Text>
+            <Text style={{color: colors.text, fontWeight: 'bold'}}>Import back up</Text>
             <Pressable onPress={() => setModalVisible3(true)}>
               <Text style={{color: colors.text}}>Import</Text>
             </Pressable>
           </View>
           <View style={styles.divider}></View>
           <View style={styles.settingsCard}>
-            <Text style={{color: colors.text}}>Version</Text>
-            <Text style={{color: colors.text}}>0.0.1</Text>
+            <Text style={{color: colors.text, fontWeight: 'bold'}}>Version</Text>
+            <Text style={{color: colors.text}}>0.1.0</Text>
           </View>
           <View style={styles.divider}></View>
         </View>
-      </View>
-      <View>
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: 'bold',
-            alignSelf: 'center',
-            marginHorizontal: 30,
-            color: colors.text,
-          }}>
-          User Info
-        </Text>
-        <Text
-          style={{
-            marginLeft: '5%',
-            color: colors.text,
-          }}>
-          Username
-        </Text>
-        <TextInput
-          style={{
-            width: '90%',
-            justifyContent: 'space-between',
-            alignSelf: 'center',
-            height: 40,
-            margin: 12,
-            borderWidth: 1,
-            padding: 10,
-            borderColor: colors.border,
-            color: colors.text,
-          }}
-          onChangeText={onChangeUsername}
-          value={username}
-          placeholder="no username added"
-        />
-      </View>
-      <Text
-        style={{
-          marginLeft: '5%',
-          color: colors.text,
-        }}>
-        Email
-      </Text>
-      <TextInput
-        style={{
-          width: '90%',
-          justifyContent: 'space-between',
-          alignSelf: 'center',
-          height: 40,
-          margin: 12,
-          borderWidth: 1,
-          padding: 10,
-          borderColor: colors.border,
-          color: colors.text,
-        }}
-        onChangeText={onChangeEmail}
-        value={email}
-        placeholder="no email added"
-      />
-      <View style={styles.settingButton}>
-        <Button
-          title="Save"
-          onPress={() => writeUserToStorage({username: username, email: email})}
-        />
       </View>
       <Modal
         animationType="slide"
@@ -286,20 +203,6 @@ const Settings = ({navigation}) => {
         </View>
       </Modal>
       <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible2}
-        onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
-          setModalVisible(!modalVisible2);
-        }}>
-        <View style={styles.centeredView}>
-          <View>
-            <Image style={{width: 100, height: 100}} source={logo} />
-          </View>
-        </View>
-      </Modal>
-      <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible3}
@@ -334,22 +237,166 @@ const Settings = ({navigation}) => {
               }}>
               Enter your back up phrase:
             </Text>
-            <View
-              style={{
-                borderWidth: 1,
-                minWidth: "100%",
-                minHeight: "20%",
-                marginTop: 20,
-                borderColor: colors.border,
-                color: colors.text,
-              }}>
-              <UselessTextInput
-                multiline
-                numberOfLines={4}
-                onChangeText={text => onChangeBackUp(text)}
-                placeholder="word1 word2 word3 ..."
-                value={backUp}
-                style={{padding: 10}}
+            <View style={styles.backUpRow}>
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp1}
+                value={backUp1}
+                placeholder="word 1"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp2}
+                value={backUp2}
+                placeholder="word 2"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp3}
+                value={backUp3}
+                placeholder="word 3"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp4}
+                value={backUp4}
+                placeholder="word 4"
+                autoCapitalize='none'
+              />
+            </View>
+            <View style={styles.backUpRow}>
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp5}
+                value={backUp5}
+                placeholder="word 5"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp6}
+                value={backUp6}
+                placeholder="word 6"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp7}
+                value={backUp7}
+                placeholder="word 7"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp8}
+                value={backUp8}
+                placeholder="word 8"
+                autoCapitalize='none'
+              />
+            </View>
+            <View style={styles.backUpRow}>
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp9}
+                value={backUp9}
+                placeholder="word 9"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp10}
+                value={backUp10}
+                placeholder="word 10"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp11}
+                value={backUp11}
+                placeholder="word 11"
+                autoCapitalize='none'
+              />
+              <TextInput
+                style={[
+                  styles.backUpInput,
+                  {
+                    borderColor: colors.border,
+                    color: colors.text,
+                  },
+                ]}
+                onChangeText={onChangeBackUp12}
+                value={backUp12}
+                placeholder="word 12"
+                autoCapitalize='none'
               />
             </View>
             <Pressable

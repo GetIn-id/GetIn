@@ -6,6 +6,7 @@ import Scan from "./src/screens/Scan";
 import HomeTabs from "./src/features/HomeTabs";
 import SignIn from "./src/screens/SignIn";
 import Success from "./src/screens/Success";
+import Home from "./src/screens/Home";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -47,7 +48,7 @@ const App = () => {
           component={HomeTabs}
           options={{headerShown: false}}
         />
-        <Stack.Screen name="Scan QR" component={Scan} options={{title: 'Scan QR-code'}} />
+        <Stack.Screen name="Scan QR" component={Scan} options={{title: 'Scan QR-code' }} />
         <Stack.Screen name="SignIn" component={SignIn} options={{title: 'Sign in'}} />
         <Stack.Screen name="Success" component={Success} options={{title: 'Success!'}} />
       </Stack.Navigator>

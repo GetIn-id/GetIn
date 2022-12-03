@@ -132,7 +132,7 @@ export const styles = StyleSheet.create({
   },
   settingButton: {
     width: "90%",
-    height: "20%",
+    height: "100%",
     justifyContent: "space-around",
     alignSelf: "center",
   },
@@ -168,6 +168,20 @@ export const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 60,
     textAlign: "center"
-
-  }
+  }, 
+  backUpInput: {
+    justifyContent: 'space-between',
+    alignSelf: 'center',
+    height: 40,
+    margin: 12,
+    borderBottomWidth: 1,
+    padding: 10,
+    autoCapitalize: "none"
+  },
+  backUpRow: {
+    width: "90%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignSelf: "center",
+  },
 });
