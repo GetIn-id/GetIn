@@ -63,8 +63,9 @@ const Home = ({navigation, route}) => {
   };
 
   useEffect(() => {
-    navigation.canGoBack() ? 
-      navigation.dispatch(StackActions.popToTop()) : null; 
+    navigation.canGoBack()
+      ? navigation.dispatch(StackActions.popToTop())
+      : null;
     readMnemonicFromStorage();
     setLoading(true);
   }, []);
@@ -146,8 +147,8 @@ const Home = ({navigation, route}) => {
                     paddingTop: 20,
                   }}>
                   Log in on a webpage by clicking the button below and scan the
-                  QR code. If the QR is on this device, just tap it!  
-                </Text> 
+                  QR code. If the QR is on this device, just tap it!
+                </Text>
               )}
             </View>
             <View style={styles.buttonSection}>
