@@ -97,34 +97,32 @@ const Settings = ({navigation}) => {
       backUp11 +
       ' ' +
       backUp12;
-      let result = backUp.includes(null);
-      if(!result) {
-    try {
-      await writeMnemonicToStorage(backUp, seed);
+    let result = backUp.includes(null);
+    if (!result) {
+      try {
+        await writeMnemonicToStorage(backUp, seed);
+        setLoading(false);
+        setModalVisible3(!modalVisible3);
+        setModalVisible2(true);
+        setTimeout(() => {
+          setModalVisible2(false);
+        }, 1750);
+      } catch (error) {
+        setLoading(false);
+        setModalVisible3(!modalVisible3);
+        Alert.alert('Importing failed', 'An error occured: ' + error, [
+          {text: 'OK', onPress: () => console.log('OK Pressed')},
+        ]);
+      }
+    } else {
       setLoading(false);
-      setModalVisible3(!modalVisible3);
-      setModalVisible2(true);
-      setTimeout(() => {
-        setModalVisible2(false);
-      }, 1750);
-    } catch (error) {
-      setLoading(false);
-      setModalVisible3(!modalVisible3);
-      Alert.alert(
-        'Importing failed',
-        'An error occured: ' + error ,
-        [{text: 'OK', onPress: () => console.log('OK Pressed')}],
-      );
-    }
-  } else {
-    setLoading(false);
       setModalVisible3(!modalVisible3);
       Alert.alert(
         'Importing failed',
         'An error occurred. Did you type in all 12 words? Remember that the back-up phrase is case sensitive.',
         [{text: 'OK', onPress: () => console.log('OK Pressed')}],
       );
-  }
+    }
   };
 
   return (

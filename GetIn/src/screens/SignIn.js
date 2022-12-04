@@ -28,14 +28,16 @@ function SignIn({navigation, route}) {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [invalidQr, setInvalidQr] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [isUser, setIsUser] = useState(false);
+  const [isEmail, setIsEmail] = useState(false);
   const [sameDevice, setSameDevice] = useState(false);
   const {getItem, setItem} = useAsyncStorage('user');
   const [username, setUsername] = useState('');
-  const [navUrl, setNavUrl] = useState('');
+  const [email, setEmail] = useState('');
   const {colors} = useTheme();
 
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const toggleUser = () => setIsUser(!isUser);
+  const toggleEmail = () => setIsEmail(!isEmail);
 
   useEffect(() => {
     try {
@@ -61,6 +63,7 @@ function SignIn({navigation, route}) {
       if (stringItem) {
         const jsonItem = JSON.parse(stringItem);
         setUsername(jsonItem.username);
+        setEmail(jsonItem.email);
       } else {
         console.log('No user info stored');
       }
@@ -146,8 +149,14 @@ function SignIn({navigation, route}) {
       const linkingPublicKeyBuffer = Buffer.from(linkingPublicKey);
       const linkingPublicKeyHex = linkingPublicKeyBuffer.toString('hex');
 
-      if (username !== '' && isEnabled) {
+      if (username !== '' && isUser && !isEmail) {
         const auth = `${callback}&sig=${signedK1hex}&key=${linkingPublicKeyHex}&username=${username}`;
+        setAuth(auth);
+      } else if (email !== '' && isEmail && !isUser) {
+        const auth = `${callback}&sig=${signedK1hex}&key=${linkingPublicKeyHex}&email=${email}`;
+        setAuth(auth);
+      } else if (username !== '' && email !== '' && isEmail && isUser) {
+        const auth = `${callback}&sig=${signedK1hex}&key=${linkingPublicKeyHex}&username=${username}&email=${email}`;
         setAuth(auth);
       } else {
         const auth = `${callback}&sig=${signedK1hex}&key=${linkingPublicKeyHex}`;
@@ -155,15 +164,14 @@ function SignIn({navigation, route}) {
       }
       setLoading(false);
     }
-  }, [seed, isEnabled]);
+  }, [seed, isUser, isEmail]);
 
   const handleSignIn = () => {
-    console.log(domain);
     const domainSplit = domain.split('.');
-
-    const navUrl = domainSplit.length == 3 ? 'https://' + domainSplit[1] + '.' + domainSplit[2] : 'https://' + domainSplit[0] + '.' + domainSplit[1];
-
-    console.log(navUrl);
+    const navUrl =
+      domainSplit.length == 3
+        ? 'https://' + domainSplit[1] + '.' + domainSplit[2]
+        : 'https://' + domainSplit[0] + '.' + domainSplit[1];
     setSending(true);
     fetch(auth)
       .then(response => response.json())
@@ -270,10 +278,18 @@ function SignIn({navigation, route}) {
                   <Text style={{color: colors.text}}>Username</Text>
                   <Switch
                     trackColor={{false: '#767577', true: colors.primary}}
-                    // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
                     ios_backgroundColor="#3e3e3e"
-                    onValueChange={toggleSwitch}
-                    value={isEnabled}
+                    onValueChange={toggleUser}
+                    value={isUser}
+                  />
+                </View>
+                <View style={[styles.settingsCard, {marginTop: 10}]}>
+                  <Text style={{color: colors.text}}>Email</Text>
+                  <Switch
+                    trackColor={{false: '#767577', true: colors.primary}}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={toggleEmail}
+                    value={isEmail}
                   />
                 </View>
               </>
@@ -296,8 +312,19 @@ function SignIn({navigation, route}) {
                     trackColor={{false: '#767577', true: colors.primary}}
                     // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
                     ios_backgroundColor="#3e3e3e"
-                    onValueChange={toggleSwitch}
-                    value={isEnabled}
+                    onValueChange={toggleUser}
+                    value={isUser}
+                    disabled={true}
+                  />
+                </View>
+                <View style={[styles.settingsCard, {marginTop: 10}]}>
+                  <Text style={{color: colors.text}}>Email</Text>
+                  <Switch
+                    trackColor={{false: '#767577', true: colors.primary}}
+                    // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={toggleEmail}
+                    value={isEmail}
                     disabled={true}
                   />
                 </View>
@@ -320,7 +347,7 @@ function SignIn({navigation, route}) {
             <Button
               title="Cancel"
               style={styles.CancelButton}
-              onPress={() => navigation.navigate('HomeTabs', {replace: true})}
+              onPress={() => navigation.navigate('HomeTabs')}
             />
             {loading ? (
               <Button
