@@ -179,9 +179,24 @@ export const styles = StyleSheet.create({
     autoCapitalize: "none"
   },
   backUpRow: {
-    width: "90%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignSelf: "center",
   },
+  backUpButton: {
+    width: "90%",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignSelf: "center",
+  },
+  loading: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: "#F5FCFF88",
+  }
 });

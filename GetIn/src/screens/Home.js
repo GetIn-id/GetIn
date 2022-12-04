@@ -63,7 +63,8 @@ const Home = ({navigation, route}) => {
   };
 
   useEffect(() => {
-    navigation.dispatch(StackActions.popToTop());
+    navigation.canGoBack() ? 
+      navigation.dispatch(StackActions.popToTop()) : null; 
     readMnemonicFromStorage();
     setLoading(true);
   }, []);
