@@ -32,6 +32,7 @@ function SignIn({navigation, route}) {
   const [sameDevice, setSameDevice] = useState(false);
   const {getItem, setItem} = useAsyncStorage('user');
   const [username, setUsername] = useState('');
+  const [navUrl, setNavUrl] = useState('');
   const {colors} = useTheme();
 
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
@@ -157,8 +158,12 @@ function SignIn({navigation, route}) {
   }, [seed, isEnabled]);
 
   const handleSignIn = () => {
+    console.log(domain);
     const domainSplit = domain.split('.');
-    const navUrl = 'https://' + domainSplit[1] + '.' + domainSplit[2];
+
+    const navUrl = domainSplit.length == 3 ? 'https://' + domainSplit[1] + '.' + domainSplit[2] : 'https://' + domainSplit[0] + '.' + domainSplit[1];
+
+    console.log(navUrl);
     setSending(true);
     fetch(auth)
       .then(response => response.json())
