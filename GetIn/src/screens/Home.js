@@ -50,7 +50,8 @@ const Home = ({navigation, route}) => {
 
   const createMnemonic = async () => {
     try {
-      const randomBytes = new Uint8Array(256 / 8);
+      const strength = 128;
+      const randomBytes = new Uint8Array(strength / 8);
       crypto.getRandomValues(randomBytes);
       const mn = generateMnemonicFromRandomBytes(wordlist, randomBytes);
       if (mn) {
