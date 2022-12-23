@@ -9,8 +9,10 @@ import {useTheme, StackActions} from '@react-navigation/native';
 import {useColorScheme} from 'react-native';
 import * as Keychain from 'react-native-keychain';
 import * as Progress from 'react-native-progress';
-import {generateMnemonic} from '@scure/bip39';
 import {wordlist} from '@scure/bip39/wordlists/english';
+import { generateMnemonicFromRandomBytes } from '@getin-id/bip39';
+
+import 'react-native-get-random-values';
 
 const logo = require('../assets/Logo2.png');
 
@@ -48,7 +50,9 @@ const Home = ({navigation, route}) => {
 
   const createMnemonic = async () => {
     try {
-      const mn = generateMnemonic(wordlist, 128);
+      const randomBytes = new Uint8Array(256 / 8);
+      crypto.getRandomValues(randomBytes);
+      const mn = generateMnemonicFromRandomBytes(wordlist, randomBytes);
       if (mn) {
         const seed = await mnemonicToSeed(mn);
         setSeed(seed);
