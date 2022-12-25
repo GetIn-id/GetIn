@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@getin-id/bip39": "^1.2.1",
     "@noble/secp256k1": "^1.7.0",
     "@react-native-async-storage/async-storage": "^1.17.10",
     "@react-navigation/bottom-tabs": "^6.4.0",
@@ -24,7 +25,8 @@
     "node-libs-react-native": "^1.2.1",
     "react": "18.1.0",
     "react-native": "0.70.4",
-    "react-native-camera": "^4.2.1",
+    "react-native-camera": "github:GetIn-id/react-native-camera#4b5fddd0232d62e3d007f456f9289d10d0fe3cb1",
+    "react-native-get-random-values": "^1.8.0",
     "react-native-keychain": "^8.1.1",
     "react-native-permissions": "^3.6.1",
     "react-native-progress": "^5.0.0",
