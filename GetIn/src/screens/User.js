@@ -11,13 +11,13 @@ import {
 } from 'react-native';
 import {relayInit, nip19} from 'nostr-tools';
 import Button from '../features/Button';
-//import {useAsyncStorage} from '@react-native-async-storage/async-storage';
 import {useTheme} from '@react-navigation/native';
+import * as Progress from 'react-native-progress';
+import LinearGradient from 'react-native-linear-gradient';
+
 const logo = require('../assets/checkbox2.png');
 
 function User() {
-  //const {getItem, setItem} = useAsyncStorage('user');
-  const [modalVisible2, setModalVisible2] = useState(false);
   const {colors} = useTheme();
 
   const [relay, setRelay] = useState(null);
@@ -25,43 +25,18 @@ function User() {
     '66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b',
   );
   const [allEvents, setAllEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [metaData, setMetaData] = useState({
     name: '',
     display_name: 'Anon',
     picture: '',
     about: '',
   });
-  // const readUserFromStorage = async () => {
-  //   try {
-  //     const stringItem = await getItem();
-  //     if (stringItem) {
-  //       const jsonItem = JSON.parse(stringItem);
-  //       onChangeUsername(jsonItem.username);
-  //       onChangeEmail(jsonItem.email);
-  //     } else {
-  //       console.log('No user info stored');
-  //     }
-  //   } catch (error) {
-  //     console.log("Storage couldn't be accessed!", error);
-  //   }
-  // };
-
-  // const writeUserToStorage = async newValue => {
-  //   setModalVisible2(true);
-  //   const jsonValue = JSON.stringify(newValue);
-  //   await setItem(jsonValue);
-  //   setTimeout(() => {
-  //     setModalVisible2(false);
-  //   }, 1250);
-  // };
-
-  // useEffect(() => {
-  //   readUserFromStorage();
-  // }, []);
+  const defaultBanner = 'https://i.postimg.cc/k4mw8zK3/lilabanner2.png';
 
   useEffect(() => {
     const connectRelays = async () => {
-      const relay = relayInit('wss://nostr.relayer.se');
+      const relay = relayInit('wss://relay.snort.social');
       await relay.connect();
       relay.on('connect', () => {
         setRelay(relay);
@@ -90,15 +65,18 @@ function User() {
         if (allEvents.some(e => e.id === event.id)) {
           /* event already exists */
           console.log('event exist');
+          setIsLoading(false);
         } else {
           allEvents.push(event);
           console.log(event);
           const content = JSON.parse(event.content);
           setMetaData(content);
+          setIsLoading(false);
         }
       });
     } else {
       console.log('no relay');
+      setIsLoading(true);
     }
   }, [relay]);
 
@@ -106,80 +84,125 @@ function User() {
   return (
     <SafeAreaView>
       <StatusBar />
-      <View
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.container}>
-        <View style={styles.logoSection}>
-          {metaData.picture !== '' ? (
-            <Image
-              style={styles.logo}
-              source={{
-                uri: metaData.picture,
-              }}
-            />
-          ) : (
-            <Image style={styles.logo} source={logo} />
-          )}
+      {isLoading ? (
+        <View style={styles.circles}>
+          <Progress.CircleSnail color={colors.primary} />
         </View>
-        <View style={styles.settingsView}>
-          <View style={[styles.settingsCard, {marginTop: 25}]}>
-            <Text style={{color: colors.text, fontWeight: 'bold'}}>
-              Username
-            </Text>
-            <Text style={{color: colors.text}}>{metaData.display_name}</Text>
+      ) : (
+        <View style={styles.screen}>
+          <View style={styles.banner}>
+            {metaData.banner ? (
+              <Image
+                style={styles.bannerImage}
+                source={{
+                  uri: metaData.banner,
+                }}
+              />
+            ) : (
+              <Image source={defaultBanner} />
+            )}
           </View>
-          <View style={[styles.settingsCard, {marginTop: 25}]}>
-            <Text style={{color: colors.text, fontWeight: 'bold'}}>
-              Profile identifier
-            </Text>
-            <Text style={{color: colors.text}}>@{metaData.name}</Text>
+          <View>
+            {metaData.picture ? (
+              <Image
+                style={styles.avatar}
+                source={{
+                  uri: metaData.picture,
+                }}
+              />
+            ) : (
+              <Image style={styles.logo} source={logo} />
+            )}
           </View>
-          <View style={[styles.settingsCard, {marginTop: 25}]}>
-            <Text style={{color: colors.text, fontWeight: 'bold'}}>
-              About me
-            </Text>
-            <Text style={{color: colors.text}}>{metaData.about}</Text>
+          <View style={styles.nameView}>
+            <LinearGradient
+              colors={['#b785edff', '#5d00c8ff']}
+              start={{ x: 0.1, y: 1 }}
+              end={{x: 1, y: 0}}
+              style={styles.linearGradient}>
+              <Text style={styles.nameText}>
+                {metaData.display_name && metaData.display_name}
+              </Text>
+              <Text style={styles.nameIdText}>
+                @{metaData.name && metaData.name}
+              </Text>
+            </LinearGradient>
           </View>
-          <View style={[styles.settingsCard, {marginTop: 25}]}>
-            <Text style={{color: colors.text, fontWeight: 'bold'}}>
-              Website
-            </Text>
-            <Text style={{color: colors.text}}>{metaData.website}</Text>
-          </View>
-        </View>
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible2}
-          onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-            setModalVisible2(!modalVisible2);
-          }}>
-          <View style={styles.centeredView}>
-            <View>
-              <Image style={{width: 100, height: 100}} source={logo} />
+          <View style={styles.settingsView}>
+            <View style={[styles.settingsCard, {marginTop: 25}]}>
+              <Text style={{color: colors.text, fontWeight: 'bold'}}>
+                Username
+              </Text>
+              <Text style={{color: colors.text}}>{metaData.display_name}</Text>
+            </View>
+            <View style={[styles.settingsCard, {marginTop: 25}]}>
+              <Text style={{color: colors.text, fontWeight: 'bold'}}>
+                Profile identifier
+              </Text>
+              <Text style={{color: colors.text}}>@{metaData.name}</Text>
+            </View>
+            <View style={[styles.settingsCard, {marginTop: 25}]}>
+              <Text style={{color: colors.text, fontWeight: 'bold'}}>
+                About me
+              </Text>
+              <Text style={{color: colors.text}}>{metaData.about}</Text>
+            </View>
+            <View style={[styles.settingsCard, {marginTop: 25}]}>
+              <Text style={{color: colors.text, fontWeight: 'bold'}}>
+                Website
+              </Text>
+              <Text style={{color: colors.text}}>{metaData.website}</Text>
             </View>
           </View>
-        </Modal>
-      </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
+  screen: {
+    width: '100%',
+    height: '100%',
   },
-  logoSection: {
-    width: '90%',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignSelf: 'center',
+  banner: {
+    width: '100%',
+    height: '20%',
   },
-  logo: {
-    alignSelf: 'center',
-    width: '30%',
-    height: '50%',
+  bannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatar: {
+    position: 'absolute',
+    top: -60,
+    left: '60%',
+    right: 0,
+    bottom: 0,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  nameView: {
+    width: '100%',
+    height: '12%',
+    zIndex: -1,
+    elevation: -1,
+  },
+  linearGradient: {
+    height: '100%',
+    width: '100%',
+  },
+  nameText: {
+    marginTop: 20,
+    marginLeft: 10,
+    fontSize: 20,
+    color: "white"
+  },
+  nameIdText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: "white"
   },
   settingsView: {
     height: '35%',
@@ -189,6 +212,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignSelf: 'center',
+  },
+  circles: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
   },
 });
 

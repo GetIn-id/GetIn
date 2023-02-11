@@ -14,7 +14,7 @@ import { generateMnemonicFromRandomBytes } from '@getin-id/bip39';
 
 import 'react-native-get-random-values';
 
-const logo = require('../assets/Logo2.png');
+const logo = require('../assets/logo_lila.png');
 
 const Home = ({navigation, route}) => {
   const [mnemonic, setMnemonic] = useState(null);
