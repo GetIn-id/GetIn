@@ -14,6 +14,8 @@ import Button from '../features/Button';
 import {useTheme} from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
+import KeyButton from '../features/KeyButton';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const logo = require('../assets/checkbox2.png');
 
@@ -36,44 +38,53 @@ function User() {
 
   useEffect(() => {
     const connectRelays = async () => {
-      const relay = relayInit('wss://relay.snort.social');
-      await relay.connect();
-      relay.on('connect', () => {
-        setRelay(relay);
-        console.log(`connected to ${relay.url}`);
-      });
-      relay.on('error', () => {
-        console.log(`failed to connect to ${relay.url}`);
-      });
+      try {
+        const relay = relayInit('wss://nos.lol');
+        await relay.connect();
+        relay.on('connect', () => {
+          setRelay(relay);
+          console.log(`connected to ${relay.url}`);
+        });
+        relay.on('error', () => {
+          console.log(`failed to connect to ${relay.url}`);
+        });
+      } catch (error) {
+        console.log('error connecting to relay');
+      }
     };
     connectRelays();
   }, []);
 
   useEffect(() => {
     if (relay !== null) {
-      let sub = relay.sub([
-        {
-          authors: [
-            //'32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245' //66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b
-            //'66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b',
-            publicKey,
-          ],
-          kinds: [0],
-        },
-      ]);
-      sub.on('event', event => {
-        if (allEvents.some(e => e.id === event.id)) {
-          /* event already exists */
-          console.log('event exist');
-          setIsLoading(false);
-        } else {
-          allEvents.push(event);
-          console.log(event);
-          const content = JSON.parse(event.content);
-          setMetaData(content);
-          setIsLoading(false);
-        }
-      });
+      try {
+        let sub = relay.sub([
+          {
+            authors: [
+              //'32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245' //66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b
+              //'66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b',
+              publicKey,
+            ],
+            kinds: [0],
+            //limit: [2]
+          },
+        ]);
+        sub.on('event', event => {
+          if (allEvents.some(e => e.id === event.id)) {
+            /* event already exists */
+            console.log('event exist');
+            setIsLoading(false);
+          } else {
+            allEvents.push(event);
+            console.log(event);
+            const content = JSON.parse(event.content);
+            setMetaData(content);
+            setIsLoading(false);
+          }
+        });
+      } catch {
+        console.log('subscribtion failed');
+      }
     } else {
       console.log('no relay');
       setIsLoading(true);
@@ -117,7 +128,7 @@ function User() {
           <View style={styles.nameView}>
             <LinearGradient
               colors={['#b785edff', '#5d00c8ff']}
-              start={{ x: 0.1, y: 1 }}
+              start={{x: 0.1, y: 1}}
               end={{x: 1, y: 0}}
               style={styles.linearGradient}>
               <Text style={styles.nameText}>
@@ -127,6 +138,20 @@ function User() {
                 @{metaData.name && metaData.name}
               </Text>
             </LinearGradient>
+          </View>
+          <View style={styles.buttonView}>
+          <View style={styles.buttonColumn}>
+              <Text style={styles.buttonText}>Private Key</Text>
+              <KeyButton
+                icon={<Icon name="lock-closed-outline" size={30} color={'white'} />}
+              />
+            </View>
+            <View style={styles.buttonColumn}>
+              <Text style={styles.buttonText}>Public Key</Text>
+              <KeyButton
+                icon={<Icon name="qr-code-outline" size={30} color={'white'} />}
+              />
+            </View>
           </View>
           <View style={styles.settingsView}>
             <View style={[styles.settingsCard, {marginTop: 25}]}>
@@ -195,14 +220,32 @@ const styles = StyleSheet.create({
   },
   nameText: {
     marginTop: 20,
-    marginLeft: 10,
+    marginLeft: '5%',
     fontSize: 20,
-    color: "white"
+    color: 'white',
   },
   nameIdText: {
-    marginLeft: 10,
+    marginLeft: '5%',
     fontSize: 14,
-    color: "white"
+    color: 'white',
+  },
+  buttonView: {
+    width: '70%',
+    height: '20%',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignSelf: 'center',
+  },
+  buttonColumn: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: "100%",
+    height: "100%",
+  },
+  buttonText: {
+    fontSize: 14,
+    marginBottom: 10,
   },
   settingsView: {
     height: '35%',
