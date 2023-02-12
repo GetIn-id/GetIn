@@ -1,6 +1,5 @@
 import {TouchableOpacity, Text, StyleSheet} from 'react-native';
 import React from 'react';
-
 import LinearGradient from 'react-native-linear-gradient';
 
 const KeyButton = ({onPress, icon, disabled}) => {
@@ -10,7 +9,7 @@ const KeyButton = ({onPress, icon, disabled}) => {
       disabled={disabled}
       style={styles.keyButton}>
       <LinearGradient
-        colors={['#b785edff', '#5d00c8ff']}
+        colors={['#d2b3f4ff', '#5d00c8ff']}
         start={{x: 0.1, y: 1}}
         end={{x: 1, y: 0}}
         style={styles.gradient}>

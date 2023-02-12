@@ -8,6 +8,7 @@ import {
   Modal,
   Image,
   StyleSheet,
+  Pressable,
 } from 'react-native';
 import {relayInit, nip19} from 'nostr-tools';
 import Button from '../features/Button';
@@ -16,7 +17,6 @@ import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
 import KeyButton from '../features/KeyButton';
 import Icon from 'react-native-vector-icons/Ionicons';
-import KeyModal from '../features/KeyModal';
 
 const logo = require('../assets/checkbox2.png');
 
@@ -103,6 +103,10 @@ function User() {
     }
   }, [relay]);
 
+  const handleSave = () => {
+    console.log('meta data saved');
+  };
+
   console.log(metaData);
   return (
     <SafeAreaView>
@@ -139,7 +143,7 @@ function User() {
           </View>
           <View style={styles.nameView}>
             <LinearGradient
-              colors={['#b785edff', '#5d00c8ff']}
+              colors={['#d2b3f4ff', '#5d00c8ff']}
               start={{x: 0.1, y: 1}}
               end={{x: 1, y: 0}}
               style={styles.linearGradient}>
@@ -156,16 +160,16 @@ function User() {
               <Text style={styles.buttonText}>Private Key</Text>
               <KeyButton
                 icon={
-                  <Icon name="lock-closed-outline" size={30} color={'white'}
-                  onPress={handleOpen}
-                  />    
+                  <Icon name="lock-closed-outline" size={30} color={'white'} />
                 }
+                onPress={handleOpen}
               />
             </View>
             <View style={styles.buttonColumn}>
               <Text style={styles.buttonText}>Public Key</Text>
               <KeyButton
                 icon={<Icon name="qr-code-outline" size={30} color={'white'} />}
+                onPress={handleOpen}
               />
             </View>
           </View>
@@ -203,9 +207,33 @@ function User() {
               value={changeNip}
             />
           </View>
+          <Button
+            title="Save"
+            icon={<Icon name="save-outline" size={24} color={'white'} />}
+            onPress={() => handleSave()}
+          />
         </View>
       )}
-      <KeyModal modalVisible={modalVisible} handleClose={handleClose} text={"testing"} />
+      <View style={styles.centeredView}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={handleClose}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>This is your public key. Share it to other Nostr users who would like to follow you.</Text>
+              <Text style={styles.keyText}>{publicKey}</Text>
+              <Button
+                //style={[styles.button, styles.buttonClose]}
+                onPress={handleClose}
+                title="Close"
+                >
+              </Button>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </SafeAreaView>
   );
 }
@@ -217,7 +245,7 @@ const styles = StyleSheet.create({
   },
   banner: {
     width: '100%',
-    height: '20%',
+    height: '17%',
   },
   bannerImage: {
     width: '100%',
@@ -232,11 +260,10 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    
   },
   nameView: {
     width: '100%',
-    height: '12%',
+    height: '10%',
     zIndex: -1,
     elevation: -1,
   },
@@ -245,13 +272,14 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   nameText: {
-    marginTop: 20,
+    marginTop: "3%",
     marginLeft: '5%',
     fontSize: 20,
     color: 'white',
   },
   nameIdText: {
     marginLeft: '5%',
+    marginTop: 2,
     fontSize: 14,
     color: 'white',
   },
@@ -274,7 +302,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   textfieldView: {
-    height: '45%',
+    height: '39%',
     width: '90%',
     marginLeft: '5%',
   },
@@ -282,15 +310,15 @@ const styles = StyleSheet.create({
     height: '20%',
     width: '100%',
     padding: 10,
-    backgroundColor: '#b785edff',
+    backgroundColor: '#d2b3f4ff',
     borderRadius: 10,
     marginBottom: 10,
   },
   input: {
-    height: '10%',
+    height: '12%',
     width: '100%',
     padding: 10,
-    backgroundColor: '#b785edff',
+    backgroundColor: '#d2b3f4ff',
     borderRadius: 10,
     marginBottom: 10,
   },
@@ -300,6 +328,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     height: '100%',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  keyText: {
+    marginBottom: 25,
+    textAlign: 'center',
+    selectable: "true",
+    fontWeight: "bold",
   },
 });
 

@@ -16,7 +16,7 @@ const App = () => {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
-      primary: "#8c04e4",
+      primary: "#5d00c8ff",
       background: "#ffffff",
     },
   };

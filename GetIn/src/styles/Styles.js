@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-const primaryColor = "#8c04e4";
+const primaryColor = "#5d00c8ff";
 const darkColor = "#00b147";
 
 export const styles = StyleSheet.create({
@@ -56,7 +56,8 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     elevation: 6,
     shadowRadius: 15 ,
-    shadowOffset : { width: 1, height: 13}
+    shadowOffset : { width: 1, height: 13},
+    borderRadius: 10,
   },
   buttonText: {
     paddingLeft: 5,

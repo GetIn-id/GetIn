@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {Alert, Modal, StyleSheet, Text, Pressable, View} from 'react-native';
 
+
 const KeyModal = (modalVisible, handleClose, text) => {
   //const [modalVisible, setModalVisible] = useState(false);
   return (
