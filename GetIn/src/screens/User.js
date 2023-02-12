@@ -16,6 +16,7 @@ import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
 import KeyButton from '../features/KeyButton';
 import Icon from 'react-native-vector-icons/Ionicons';
+import KeyModal from '../features/KeyModal';
 
 const logo = require('../assets/checkbox2.png');
 
@@ -27,6 +28,10 @@ function User() {
     '66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b',
   );
   const [allEvents, setAllEvents] = useState([]);
+  const [changeAbout, setChangeAbout] = useState('');
+  const [changeWebsite, setChangeWebsite] = useState('');
+  const [changeLightning, setChangeLightning] = useState('');
+  const [changeNip, setChangeNip] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [metaData, setMetaData] = useState({
     name: '',
@@ -34,6 +39,9 @@ function User() {
     picture: '',
     about: '',
   });
+  const [modalVisible, setModalVisible] = useState(false);
+  const handleOpen = () => setModalVisible(true);
+  const handleClose = () => setModalVisible(false);
   const defaultBanner = 'https://i.postimg.cc/k4mw8zK3/lilabanner2.png';
 
   useEffect(() => {
@@ -79,6 +87,10 @@ function User() {
             console.log(event);
             const content = JSON.parse(event.content);
             setMetaData(content);
+            setChangeAbout(content.about);
+            setChangeWebsite(content.website);
+            setChangeLightning(content.lud16);
+            setChangeNip(content.nip05);
             setIsLoading(false);
           }
         });
@@ -140,10 +152,14 @@ function User() {
             </LinearGradient>
           </View>
           <View style={styles.buttonView}>
-          <View style={styles.buttonColumn}>
+            <View style={styles.buttonColumn}>
               <Text style={styles.buttonText}>Private Key</Text>
               <KeyButton
-                icon={<Icon name="lock-closed-outline" size={30} color={'white'} />}
+                icon={
+                  <Icon name="lock-closed-outline" size={30} color={'white'}
+                  onPress={handleOpen}
+                  />    
+                }
               />
             </View>
             <View style={styles.buttonColumn}>
@@ -153,34 +169,43 @@ function User() {
               />
             </View>
           </View>
-          <View style={styles.settingsView}>
-            <View style={[styles.settingsCard, {marginTop: 25}]}>
-              <Text style={{color: colors.text, fontWeight: 'bold'}}>
-                Username
-              </Text>
-              <Text style={{color: colors.text}}>{metaData.display_name}</Text>
-            </View>
-            <View style={[styles.settingsCard, {marginTop: 25}]}>
-              <Text style={{color: colors.text, fontWeight: 'bold'}}>
-                Profile identifier
-              </Text>
-              <Text style={{color: colors.text}}>@{metaData.name}</Text>
-            </View>
-            <View style={[styles.settingsCard, {marginTop: 25}]}>
-              <Text style={{color: colors.text, fontWeight: 'bold'}}>
-                About me
-              </Text>
-              <Text style={{color: colors.text}}>{metaData.about}</Text>
-            </View>
-            <View style={[styles.settingsCard, {marginTop: 25}]}>
-              <Text style={{color: colors.text, fontWeight: 'bold'}}>
-                Website
-              </Text>
-              <Text style={{color: colors.text}}>{metaData.website}</Text>
-            </View>
+          <View style={styles.textfieldView}>
+            <Text style={{color: colors.text}}>About me</Text>
+            <TextInput
+              placeholder="about me"
+              multiline
+              style={styles.multiInput}
+              onChangeText={setChangeAbout}
+              value={changeAbout}
+            />
+            <Text style={{color: colors.text}}>Website</Text>
+            <TextInput
+              placeholder="website"
+              multiline
+              style={styles.input}
+              onChangeText={setChangeWebsite}
+              value={changeWebsite}
+            />
+            <Text style={{color: colors.text}}>Lightning adress</Text>
+            <TextInput
+              placeholder="Lightning adress"
+              multiline
+              style={styles.input}
+              onChangeText={setChangeLightning}
+              value={changeLightning}
+            />
+            <Text style={{color: colors.text}}>nip-05 verification</Text>
+            <TextInput
+              placeholder="nip-05"
+              multiline
+              style={styles.input}
+              onChangeText={setChangeNip}
+              value={changeNip}
+            />
           </View>
         </View>
       )}
+      <KeyModal modalVisible={modalVisible} handleClose={handleClose} text={"testing"} />
     </SafeAreaView>
   );
 }
@@ -207,6 +232,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+    
   },
   nameView: {
     width: '100%',
@@ -240,21 +266,33 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   buttonText: {
     fontSize: 14,
     marginBottom: 10,
   },
-  settingsView: {
-    height: '35%',
-  },
-  settingsCard: {
+  textfieldView: {
+    height: '45%',
     width: '90%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignSelf: 'center',
+    marginLeft: '5%',
+  },
+  multiInput: {
+    height: '20%',
+    width: '100%',
+    padding: 10,
+    backgroundColor: '#b785edff',
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  input: {
+    height: '10%',
+    width: '100%',
+    padding: 10,
+    backgroundColor: '#b785edff',
+    borderRadius: 10,
+    marginBottom: 10,
   },
   circles: {
     flexDirection: 'column',
