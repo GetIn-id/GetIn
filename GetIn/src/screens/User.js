@@ -8,42 +8,57 @@ import {
   Modal,
   Image,
   StyleSheet,
-  Pressable,
 } from 'react-native';
-import {relayInit, nip19} from 'nostr-tools';
+import {relayInit, nip19, getPublicKey} from 'nostr-tools';
 import Button from '../features/Button';
 import {useTheme} from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
 import KeyButton from '../features/KeyButton';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {publishEvent} from '../functions/PublishEvent';
+import {readKeysFromStorage} from '../functions/ManageKeys';
 
-const logo = require('../assets/checkbox2.png');
+
+const logo = require('../assets/logo_lila.png');
 
 function User() {
   const {colors} = useTheme();
 
   const [relay, setRelay] = useState(null);
-  const [publicKey, setPublicKey] = useState(
-    '66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b',
-  );
+  const [pk, setPk] = useState(null);
+  const [sk, setSk] = useState(null);
   const [allEvents, setAllEvents] = useState([]);
   const [changeAbout, setChangeAbout] = useState('');
   const [changeWebsite, setChangeWebsite] = useState('');
   const [changeLightning, setChangeLightning] = useState('');
   const [changeNip, setChangeNip] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [metaData, setMetaData] = useState({
-    name: '',
-    display_name: 'Anon',
-    picture: '',
-    about: '',
-  });
-  const [modalVisible, setModalVisible] = useState(false);
-  const handleOpen = () => setModalVisible(true);
-  const handleClose = () => setModalVisible(false);
+  const [metaData, setMetaData] = useState(null);
+  const [pkModalVisible, setPkModalVisible] = useState(false);
+  const handlePkOpen = () => setPkModalVisible(true);
+  const handlePkClose = () => setPkModalVisible(false);
+  const [skModalVisible, setSkModalVisible] = useState(false);
+  const handleSkOpen = () => setSkModalVisible(true);
+  const handleSkClose = () => setSkModalVisible(false);
   const defaultBanner = 'https://i.postimg.cc/k4mw8zK3/lilabanner2.png';
 
+  //read nostr key from storage
+  useEffect(() => {
+    const readKeys = async () => {
+      try {
+        const sk = await readKeysFromStorage();
+        setSk(sk);
+        setPk(getPublicKey(sk));
+      } catch (error) {
+        console.log('error reading keys');
+      }
+    };
+    readKeys();
+    setIsLoading(true);
+  }, []);
+
+  //connect to relay
   useEffect(() => {
     const connectRelays = async () => {
       try {
@@ -63,16 +78,13 @@ function User() {
     connectRelays();
   }, []);
 
+  //sub to profile metadata
   useEffect(() => {
     if (relay !== null) {
       try {
         let sub = relay.sub([
           {
-            authors: [
-              //'32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245' //66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b
-              //'66a2eec5ef4a0c232c3c7f8720838a446296194742fe001ccb8dbb926b72518b',
-              publicKey,
-            ],
+            authors: [pk],
             kinds: [0],
             //limit: [2]
           },
@@ -84,7 +96,7 @@ function User() {
             setIsLoading(false);
           } else {
             allEvents.push(event);
-            console.log(event);
+            //console.log(event);
             const content = JSON.parse(event.content);
             setMetaData(content);
             setChangeAbout(content.about);
@@ -101,13 +113,13 @@ function User() {
       console.log('no relay');
       setIsLoading(true);
     }
-  }, [relay]);
+  }, [relay, pk]);
 
+  //publish updated metadata
   const handleSave = () => {
-    console.log('meta data saved');
+    publishEvent(relay, pk, sk, changeAbout, changeWebsite, metaData);
   };
 
-  console.log(metaData);
   return (
     <SafeAreaView>
       <StatusBar />
@@ -126,7 +138,12 @@ function User() {
                 }}
               />
             ) : (
-              <Image source={defaultBanner} />
+              <Image
+                style={styles.bannerImage}
+                source={{
+                  uri: defaultBanner,
+                }}
+              />
             )}
           </View>
           <View>
@@ -138,7 +155,7 @@ function User() {
                 }}
               />
             ) : (
-              <Image style={styles.logo} source={logo} />
+              <Image style={styles.avatar} source={logo} />
             )}
           </View>
           <View style={styles.nameView}>
@@ -162,14 +179,14 @@ function User() {
                 icon={
                   <Icon name="lock-closed-outline" size={30} color={'white'} />
                 }
-                onPress={handleOpen}
+                onPress={handleSkOpen}
               />
             </View>
             <View style={styles.buttonColumn}>
               <Text style={styles.buttonText}>Public Key</Text>
               <KeyButton
                 icon={<Icon name="qr-code-outline" size={30} color={'white'} />}
-                onPress={handleOpen}
+                onPress={handlePkOpen}
               />
             </View>
           </View>
@@ -218,18 +235,38 @@ function User() {
         <Modal
           animationType="slide"
           transparent={true}
-          visible={modalVisible}
-          onRequestClose={handleClose}>
+          visible={pkModalVisible}
+          onRequestClose={handlePkClose}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>This is your public key. Share it to other Nostr users who would like to follow you.</Text>
-              <Text style={styles.keyText}>{publicKey}</Text>
+              <Text style={styles.modalText}>
+                This is your public key. Share it to other Nostr users who would
+                like to follow you.
+              </Text>
+              <Text style={styles.keyText}>{pk && nip19.npubEncode(pk)}</Text>
               <Button
                 //style={[styles.button, styles.buttonClose]}
-                onPress={handleClose}
-                title="Close"
-                >
-              </Button>
+                onPress={handlePkClose}
+                title="Close"></Button>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={skModalVisible}
+          onRequestClose={handleSkClose}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>
+                This is your secret key. This is used to login to Nostr clients.
+                DO NOT SHARE!
+              </Text>
+              <Text style={styles.keyText}>{sk && nip19.nsecEncode(sk)}</Text>
+              <Button
+                //style={[styles.button, styles.buttonClose]}
+                onPress={handleSkClose}
+                title="Close"></Button>
             </View>
           </View>
         </Modal>
@@ -272,7 +309,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   nameText: {
-    marginTop: "3%",
+    marginTop: '3%',
     marginLeft: '5%',
     fontSize: 20,
     color: 'white',
@@ -353,12 +390,12 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   keyText: {
     marginBottom: 25,
     textAlign: 'center',
-    selectable: "true",
-    fontWeight: "bold",
+    selectable: 'true',
   },
 });
 
