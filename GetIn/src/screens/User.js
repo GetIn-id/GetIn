@@ -17,8 +17,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import KeyButton from '../features/KeyButton';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {publishEvent} from '../functions/PublishEvent';
-import {readKeysFromStorage} from '../functions/ManageKeys';
-
+import {generateProfile, readKeysFromStorage} from '../functions/ManageKeys';
 
 const logo = require('../assets/logo_lila.png');
 
@@ -35,19 +34,23 @@ function User() {
   const [changeNip, setChangeNip] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [metaData, setMetaData] = useState(null);
+  const [profile, setProfile] = useState('profile1');
   const [pkModalVisible, setPkModalVisible] = useState(false);
   const handlePkOpen = () => setPkModalVisible(true);
   const handlePkClose = () => setPkModalVisible(false);
   const [skModalVisible, setSkModalVisible] = useState(false);
   const handleSkOpen = () => setSkModalVisible(true);
   const handleSkClose = () => setSkModalVisible(false);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const handleCreateOpen = () => setCreateModalVisible(true);
+  const handleCreateClose = () => setCreateModalVisible(false);
   const defaultBanner = 'https://i.postimg.cc/k4mw8zK3/lilabanner2.png';
 
   //read nostr key from storage
   useEffect(() => {
     const readKeys = async () => {
       try {
-        const sk = await readKeysFromStorage();
+        const sk = await readKeysFromStorage(profile);
         setSk(sk);
         setPk(getPublicKey(sk));
       } catch (error) {
@@ -56,7 +59,7 @@ function User() {
     };
     readKeys();
     setIsLoading(true);
-  }, []);
+  }, [profile]);
 
   //connect to relay
   useEffect(() => {
@@ -80,7 +83,30 @@ function User() {
 
   //sub to profile metadata
   useEffect(() => {
-    if (relay !== null) {
+    if (relay !== null && pk !== null) {
+      const loadList = async () => {
+        try {
+          var event = await relay.list([
+            {
+              authors: [pk],
+              kinds: [0],
+            },
+          ]);
+          
+          console.log(event);
+          setAllEvents(event);
+          // setMetaData(content);
+          // setChangeAbout(content.about);
+          // setChangeWebsite(content.website);
+          // setChangeLightning(content.lud16);
+          // setChangeNip(content.nip05);
+          // setIsLoading(false);
+          //setAllEvents(events);
+        } catch (error) {
+          console.log(`${error}`);
+        }
+      };
+      loadList();
       try {
         let sub = relay.sub([
           {
@@ -113,11 +139,25 @@ function User() {
       console.log('no relay');
       setIsLoading(true);
     }
-  }, [relay, pk]);
+  }, [pk, relay]);
 
   //publish updated metadata
   const handleSave = () => {
     publishEvent(relay, pk, sk, changeAbout, changeWebsite, metaData);
+  };
+
+  const handleCreateProfile = () => {
+    generateProfile('profile2');
+  };
+
+  const switchProfile = () => {
+    setIsLoading(true);
+    setMetaData(null);
+    if (profile === 'profile1') {
+      setProfile('profile2');
+    } else {
+      setProfile('profile1');
+    }
   };
 
   return (
@@ -130,7 +170,7 @@ function User() {
       ) : (
         <View style={styles.screen}>
           <View style={styles.banner}>
-            {metaData.banner ? (
+            {metaData && metaData.banner ? (
               <Image
                 style={styles.bannerImage}
                 source={{
@@ -147,7 +187,7 @@ function User() {
             )}
           </View>
           <View>
-            {metaData.picture ? (
+            {metaData && metaData.picture ? (
               <Image
                 style={styles.avatar}
                 source={{
@@ -165,14 +205,23 @@ function User() {
               end={{x: 1, y: 0}}
               style={styles.linearGradient}>
               <Text style={styles.nameText}>
-                {metaData.display_name && metaData.display_name}
+                {metaData && metaData.display_name}
               </Text>
               <Text style={styles.nameIdText}>
-                @{metaData.name && metaData.name}
+                @{metaData && metaData.name}
               </Text>
             </LinearGradient>
           </View>
           <View style={styles.buttonView}>
+            <View style={styles.buttonColumn}>
+              <Text style={styles.buttonText}>Switch profile</Text>
+              <KeyButton
+                icon={
+                  <Icon name="lock-closed-outline" size={30} color={'white'} />
+                }
+                onPress={switchProfile}
+              />
+            </View>
             <View style={styles.buttonColumn}>
               <Text style={styles.buttonText}>Private Key</Text>
               <KeyButton
@@ -267,6 +316,28 @@ function User() {
                 //style={[styles.button, styles.buttonClose]}
                 onPress={handleSkClose}
                 title="Close"></Button>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={createModalVisible}
+          onRequestClose={handleCreateClose}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>
+                Do you want to create a new profile or import an existing one?
+              </Text>
+
+              <Button
+                //style={[styles.button, styles.buttonClose]}
+                onPress={handleCreateProfile}
+                title="Create new"></Button>
+              <Button
+                //style={[styles.button, styles.buttonClose]}
+                onPress={handleCreateClose}
+                title="Import"></Button>
             </View>
           </View>
         </Modal>
