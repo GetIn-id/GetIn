@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {
   SafeAreaView,
   Text,
@@ -18,6 +18,7 @@ import KeyButton from '../features/KeyButton';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {publishEvent} from '../functions/PublishEvent';
 import {generateProfile, readKeysFromStorage} from '../functions/ManageKeys';
+import { UsersContext } from '../features/UserContext';
 
 const logo = require('../assets/logo_lila.png');
 
@@ -27,30 +28,28 @@ function User() {
   const [relay, setRelay] = useState(null);
   const [pk, setPk] = useState(null);
   const [sk, setSk] = useState(null);
-  const [allEvents, setAllEvents] = useState([]);
   const [changeAbout, setChangeAbout] = useState('');
   const [changeWebsite, setChangeWebsite] = useState('');
   const [changeLightning, setChangeLightning] = useState('');
   const [changeNip, setChangeNip] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [metaData, setMetaData] = useState(null);
-  const [profile, setProfile] = useState('profile1');
   const [pkModalVisible, setPkModalVisible] = useState(false);
   const handlePkOpen = () => setPkModalVisible(true);
   const handlePkClose = () => setPkModalVisible(false);
   const [skModalVisible, setSkModalVisible] = useState(false);
   const handleSkOpen = () => setSkModalVisible(true);
   const handleSkClose = () => setSkModalVisible(false);
-  const [createModalVisible, setCreateModalVisible] = useState(false);
-  const handleCreateOpen = () => setCreateModalVisible(true);
-  const handleCreateClose = () => setCreateModalVisible(false);
   const defaultBanner = 'https://i.postimg.cc/k4mw8zK3/lilabanner2.png';
+
+
+  const { user } = useContext(UsersContext);
 
   //read nostr key from storage
   useEffect(() => {
     const readKeys = async () => {
       try {
-        const sk = await readKeysFromStorage(profile);
+        const sk = await readKeysFromStorage(user);
         setSk(sk);
         setPk(getPublicKey(sk));
       } catch (error) {
@@ -59,7 +58,7 @@ function User() {
     };
     readKeys();
     setIsLoading(true);
-  }, [profile]);
+  }, [user]);
 
   //connect to relay
   useEffect(() => {
@@ -81,7 +80,7 @@ function User() {
     connectRelays();
   }, []);
 
-  //sub to profile metadata
+  //load profile metadata
   useEffect(() => {
     if (relay !== null && pk !== null) {
       const loadList = async () => {
@@ -92,49 +91,19 @@ function User() {
               kinds: [0],
             },
           ]);
-          
-          console.log(event);
-          setAllEvents(event);
-          // setMetaData(content);
-          // setChangeAbout(content.about);
-          // setChangeWebsite(content.website);
-          // setChangeLightning(content.lud16);
-          // setChangeNip(content.nip05);
-          // setIsLoading(false);
+          const content = JSON.parse(event[0].content);
+          setMetaData(content);
+          setChangeAbout(content.about);
+          setChangeWebsite(content.website);
+          setChangeLightning(content.lud16);
+          setChangeNip(content.nip05);
+          setIsLoading(false);
           //setAllEvents(events);
         } catch (error) {
           console.log(`${error}`);
         }
       };
       loadList();
-      try {
-        let sub = relay.sub([
-          {
-            authors: [pk],
-            kinds: [0],
-            //limit: [2]
-          },
-        ]);
-        sub.on('event', event => {
-          if (allEvents.some(e => e.id === event.id)) {
-            /* event already exists */
-            console.log('event exist');
-            setIsLoading(false);
-          } else {
-            allEvents.push(event);
-            //console.log(event);
-            const content = JSON.parse(event.content);
-            setMetaData(content);
-            setChangeAbout(content.about);
-            setChangeWebsite(content.website);
-            setChangeLightning(content.lud16);
-            setChangeNip(content.nip05);
-            setIsLoading(false);
-          }
-        });
-      } catch {
-        console.log('subscribtion failed');
-      }
     } else {
       console.log('no relay');
       setIsLoading(true);
@@ -146,19 +115,6 @@ function User() {
     publishEvent(relay, pk, sk, changeAbout, changeWebsite, metaData);
   };
 
-  const handleCreateProfile = () => {
-    generateProfile('profile2');
-  };
-
-  const switchProfile = () => {
-    setIsLoading(true);
-    setMetaData(null);
-    if (profile === 'profile1') {
-      setProfile('profile2');
-    } else {
-      setProfile('profile1');
-    }
-  };
 
   return (
     <SafeAreaView>
@@ -213,15 +169,6 @@ function User() {
             </LinearGradient>
           </View>
           <View style={styles.buttonView}>
-            <View style={styles.buttonColumn}>
-              <Text style={styles.buttonText}>Switch profile</Text>
-              <KeyButton
-                icon={
-                  <Icon name="lock-closed-outline" size={30} color={'white'} />
-                }
-                onPress={switchProfile}
-              />
-            </View>
             <View style={styles.buttonColumn}>
               <Text style={styles.buttonText}>Private Key</Text>
               <KeyButton
@@ -292,7 +239,7 @@ function User() {
                 This is your public key. Share it to other Nostr users who would
                 like to follow you.
               </Text>
-              <Text style={styles.keyText}>{pk && nip19.npubEncode(pk)}</Text>
+              <Text selectable={true} style={styles.keyText}>{pk && nip19.npubEncode(pk)}</Text>
               <Button
                 //style={[styles.button, styles.buttonClose]}
                 onPress={handlePkClose}
@@ -311,33 +258,11 @@ function User() {
                 This is your secret key. This is used to login to Nostr clients.
                 DO NOT SHARE!
               </Text>
-              <Text style={styles.keyText}>{sk && nip19.nsecEncode(sk)}</Text>
+              <Text selectable={true} style={styles.keyText}>{sk && nip19.nsecEncode(sk)}</Text>
               <Button
                 //style={[styles.button, styles.buttonClose]}
                 onPress={handleSkClose}
                 title="Close"></Button>
-            </View>
-          </View>
-        </Modal>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={createModalVisible}
-          onRequestClose={handleCreateClose}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>
-                Do you want to create a new profile or import an existing one?
-              </Text>
-
-              <Button
-                //style={[styles.button, styles.buttonClose]}
-                onPress={handleCreateProfile}
-                title="Create new"></Button>
-              <Button
-                //style={[styles.button, styles.buttonClose]}
-                onPress={handleCreateClose}
-                title="Import"></Button>
             </View>
           </View>
         </Modal>

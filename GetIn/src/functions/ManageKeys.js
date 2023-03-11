@@ -33,7 +33,7 @@ const readKeysFromStorage = async (profile) => {
   }
 };
 
-const generateProfile = async profile => {
+const generateProfile = async (profile) => {
   const sk = generatePrivateKey();
   try {
     await Keychain.setInternetCredentials(`${profile}`, 'sk', `${sk}`);

@@ -3,13 +3,13 @@ import {
     signEvent,
   } from 'nostr-tools';
 
-const publishEvent = (relay, pk, sk, changeAbout, changeWebsite, metaData) => {
+const publishEvent = (relay, pk, sk, changeAbout, changeWebsite, username, identifier) => {
     var event = {
         kind: 0,
         pubkey: pk,
         created_at: Math.floor(Date.now() / 1000),
         tags: [],
-        content: `{"about": "${changeAbout}", "website": "${changeWebsite}", "display_name": "${metaData.display_name}", "name": "${metaData.name}"}`,
+        content: `{"about": "${changeAbout}", "website": "${changeWebsite}", "display_name": "${username}", "name": "${identifier}"}`,
       };
   
       event.id = getEventHash(event);
